@@ -78,6 +78,24 @@ timezone. The smoke test cross-checks a full 7×24 hour grid against
   is re-priced. Say so in the UI (`panel.note`) and in `README.md`; do not remove
   that disclaimer.
 
+## Docs language
+
+`README.md` and the source comments are Chinese prose, but every technical term
+keeps its source spelling — never a translated stand-in. Established so far:
+
+| keep | never |
+|---|---|
+| `bucket`, `slot`, `projection`, `tier` | 桶, 槽位, 投影, 档 / 档位 |
+| `cache hit` / `cache miss` / `output` (the price tiers) | 缓存命中价 / 未命中价 |
+| `props`, `observable`, `bundle`, `spec`, `commit`, `smoke test` | — |
+
+UI copy is the exception: the labels a user actually reads (`缓存命中`,
+`高峰时段`) stay Chinese in `README.md` tables and diagrams, because they mirror
+the `zh` dictionary in `lib/client.js`.
+
+For disjointness say **分别计量、互不重复**, not 互不重叠 and never 互斥 — 互斥
+reads as "cannot both hold", and all four buckets are routinely nonzero at once.
+
 ## Repo quirks
 
 - Not a monorepo, no dependencies, no bundler. ESM (`"type": "module"`).

@@ -150,8 +150,8 @@ check('会话绑定缺失时返回空注入而不抛错', Object.keys(injectedMi
 /* ------------------------------------------------------ pricing unit tests */
 const { computeCost, tierForModel, isPeak, priceAt, formatCNY, PRICING } = exportsObj;
 
-check('文本模型 id 归入 pro 档', tierForModel('deepseek-v4-pro') === 'pro');
-check('flash 及其历史别名归入 flash 档',
+check('文本模型 id 归入 pro tier', tierForModel('deepseek-v4-pro') === 'pro');
+check('flash 及其历史别名归入 flash tier',
   tierForModel('deepseek-flash') === 'flash' &&
   tierForModel('deepseek-v4-flash') === 'flash' &&
   tierForModel('deepseek-chat') === 'flash' &&
@@ -162,14 +162,14 @@ const cost = computeCost(
   { uncachedInputTokens: 1_000_000, outputTokens: 500_000, cacheReadTokens: 2_000_000, cacheWriteTokens: 0 },
   offFlash);
 check('分项：缓存命中 2M × ¥0.02 = ¥0.04', Math.abs(cost.cacheRead - 0.04) < 1e-9, cost.cacheRead);
-check('分项：未命中 1M × ¥1 = ¥1', Math.abs(cost.cacheMiss - 1) < 1e-9, cost.cacheMiss);
+check('分项：cache miss 1M × ¥1 = ¥1', Math.abs(cost.cacheMiss - 1) < 1e-9, cost.cacheMiss);
 check('分项：输出 0.5M × ¥4 = ¥2', Math.abs(cost.output - 2) < 1e-9, cost.output);
 check('合计 = ¥3.04', Math.abs(cost.total - 3.04) < 1e-9, cost.total);
 
-check('缓存写入按未命中价计费',
+check('缓存写入按 cache miss 价计费',
   Math.abs(computeCost({ cacheWriteTokens: 1_000_000 }, offFlash).total - 1) < 1e-9);
 
-check('四桶互斥、不重复计费',
+check('四个 bucket 分别计量、互不重复',
   Math.abs(computeCost({ uncachedInputTokens: 0, cacheReadTokens: 0, cacheWriteTokens: 0, outputTokens: 0 }, offFlash).total) < 1e-12);
 
 check('高峰价 = 空闲价 × 2',
@@ -211,7 +211,7 @@ const OFF_PEAK_INSTANT = new Date(Date.UTC(2026, 8, 12, 2, 0, 0));   // 北京 �
 const PEAK_INSTANT = new Date(Date.UTC(2026, 8, 14, 2, 0, 0));       // 北京 周一 10:00
 check('周六为空闲时段', isPeak(OFF_PEAK_INSTANT) === false);
 check('周一 10:00 为高峰时段', isPeak(PEAK_INSTANT) === true);
-check('同一档位在两个时段的单价不同',
+check('同一 tier 在两个时段的单价不同',
   priceAt('flash', PEAK_INSTANT).cacheMiss === 2 && priceAt('flash', OFF_PEAK_INSTANT).cacheMiss === 1);
 
 /* ------------------------------------------------------------- rendering */
@@ -312,7 +312,7 @@ check('渲染出触发器按钮（含 onClick）', button !== null && typeof but
 button.props.onClick();                       // 打开面板
 const opened = render(propsFor());
 const openText = collectText(opened, []).join(' ');
-check('明细面板列出四个 token 桶中的三个非零项',
+check('明细面板列出四个 token bucket 中的三个非零项',
   openText.indexOf('row.cacheHit') !== -1 && openText.indexOf('row.cacheMiss') !== -1 &&
   openText.indexOf('row.output') !== -1);
 check('明细面板不列出零用量的缓存写入行', openText.indexOf('row.cacheWrite') === -1);
@@ -355,7 +355,7 @@ const proChip = render({
   useCostModelSelection: () => ({ next: { provider: 'deepseek', model: 'deepseek-v4-pro' }, lastUsed: null })
 });
 const proText = collectText(proChip, []).join(' ');
-check('同一用量在 pro 档 = ¥11.55（flash 空闲价 ¥3.04 的 3.8 倍）',
+check('同一用量在 pro tier = ¥11.55（flash 空闲价 ¥3.04 的 3.8 倍）',
   proText.indexOf('11.55') !== -1, proText.slice(0, 90));
 
 /* --- 空态与兜底 --- */
