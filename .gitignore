@@ -1,3 +1,5 @@
 node_modules/
 .DS_Store
 *.log
+# Harness snapshots of files it edits outside the workspace (profile config).
+.backups/
