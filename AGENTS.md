@@ -20,8 +20,13 @@ End-to-end verification needs the CLI from outside this repo:
 
 ```sh
 cd /Volumes/DATA/workspace
-dsh plugin --profile web add ./dsh-session-cost
+dsh plugin --profile web add ./dsh-session-cost   # local link: form
 dsh --profile web --dump-config | grep -A2 session-cost
+
+# the live boot graph of a running server (unauthenticated SSE) proves the
+# client row composed; the running `dsh web` must be restarted if the
+# dependency spec changed on disk, since module resolution is cached at boot
+curl -s -N --max-time 4 http://127.0.0.1:3080/plugins/events | grep -o dsh-session-cost | head -1
 ```
 
 Then **refresh the browser** — `window.__DSH_BOOT__` is injected at page load, so a
@@ -76,7 +81,12 @@ timezone. The smoke test cross-checks a full 7×24 hour grid against
 ## Repo quirks
 
 - Not a monorepo, no dependencies, no bundler. ESM (`"type": "module"`).
-- The profile installs this package as a `link:` dependency, so edits to
-  `lib/client.js` take effect on the next browser reload — no reinstall needed.
-  Only a `package.json` change (e.g. `dsh.client`) requires re-running
-  `dsh plugin ... add`.
+- The `web` profile can hold this package either way, and the difference decides
+  the edit loop:
+  - `link:/path/to/dsh-session-cost` — edits to `lib/client.js` take effect on the
+    next browser reload, no reinstall. This is the development form.
+  - `github:madeye/dsh-session-cost` — pinned to a commit; changing runtime code
+    means push, then re-run `dsh plugin ... add`, then reload.
+  Either way a `package.json` change (e.g. `dsh.client`) requires re-running
+  `dsh plugin ... add`, and switching between the two specs needs a `dsh web`
+  restart because module resolution is cached at boot.

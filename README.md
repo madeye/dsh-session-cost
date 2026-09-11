@@ -21,8 +21,11 @@ DeepSeek Harness（dsh）客户端插件：在 **Web GUI 会话头部实时显�
 ## 安装
 
 ```sh
-# 1) 装进目标 profile（会 pnpm link 到该 profile 的 node_modules）
-cd /Volumes/DATA/workspace
+# 1) 装进目标 profile
+#    从 GitHub 装（版本钉在 commit 上，适合日常使用）
+dsh plugin --profile web add github:madeye/dsh-session-cost
+
+#    或从本地目录装成 link:（改代码即时生效，适合开发）
 dsh plugin --profile web add /Volumes/DATA/workspace/dsh-session-cost
 
 # 2) 在 profile 的 patch 层里注册宿主行
@@ -41,7 +44,16 @@ dsh --profile web --dump-config | grep -A2 session-cost
 ```
 
 **然后刷新浏览器页面。** 客户端插件的清单是在页面加载时注入 `window.__DSH_BOOT__`
-的，所以新增插件必须刷新一次才会出现（之后改代码只要重载即可）。
+的，所以新增插件必须刷新一次才会出现。
+
+两种装法的差别：
+
+| 装法 | profile 里的 spec | 改 `lib/client.js` 之后 |
+|---|---|---|
+| GitHub | `github:madeye/dsh-session-cost`（钉 commit） | 要 push 后重跑 `dsh plugin ... add`，再刷新页面 |
+| 本地目录 | `link:/path/to/dsh-session-cost` | 直接刷新页面即可 |
+
+两种装法下，`package.json` 的变更（例如 `dsh.client`）都需要重跑 `dsh plugin ... add`。
 
 ### 卸载
 
@@ -121,4 +133,5 @@ smoke test 覆盖：bundle 注册 id、`apply`/`inject` 契约、slot 注册描�
 - **挂钟心跳**：面板关着时也注册 30 秒定时器；只推进时间、不改 props，单价与
   「峰 / 闲」标记必须自己翻过边界。
 
-改完 `lib/client.js` 后刷新浏览器即可生效（无需重新安装，profile 里是 `link:` 形式）。
+改完 `lib/client.js` 后能否直接刷新浏览器，取决于 profile 的装法（见「安装」一节的对照表）：
+`link:` 装法直接刷新即可；GitHub 装法要 push 后重跑 `dsh plugin ... add`。
