@@ -9,7 +9,7 @@
     "./client": { "default": "./lib/client.js" },
     "./package.json": "./package.json"
   },
-  "files": ["lib/index.js", "lib/client.js", "README.md"],
+  "files": ["lib/index.js", "lib/client.js", "docs", "README.md"],
   "dsh": {
     "client": {
       "platform": "web",
